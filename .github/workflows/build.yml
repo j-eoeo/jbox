@@ -58,7 +58,6 @@ jobs:
           cp -r assets target/${{ matrix.target }}/zip
           cd target/${{ matrix.target }}/zip
           zip -r ../${{ matrix.target }}.zip .
-          cd ../..
       - name: zip for windows
         if: matrix.target == 'x86_64-pc-windows-msvc' || matrix.target == 'x86_64-pc-windows-gnu'
         run: |
@@ -67,12 +66,10 @@ jobs:
           cp -r assets target/${{ matrix.target }}/zip
           cd target/${{ matrix.target }}/zip
           powershell Compress-Archive -Path "*" -DestinationPath ../${{ matrix.target }}.zip
-          cd ../..
       - uses: actions/upload-artifact@694cdabd8bdb0f10b2cea11669e1bf5453eed0a6 # v4.2.0
         with:
           name: ${{ matrix.target }}
-          path: |
-            target/${{ matrix.target }}.zip
+          path: ${{ matrix.target }}.zip
       #- name: Upload to release
       #  if: ${{ inputs.tag-name }}
       #  working-directory: target/${{ matrix.target }}/release/
