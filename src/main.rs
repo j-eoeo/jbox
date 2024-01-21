@@ -1,4 +1,7 @@
-use std::{f32::consts::PI, time::Duration};
+use std::{
+    fs,
+    f32::consts::PI
+};
 
 use bevy::{
     core_pipeline::clear_color::ClearColorConfig,
@@ -9,16 +12,25 @@ use bevy::{
         render_resource::{
             Extent3d, TextureDescriptor, TextureDimension, TextureFormat, TextureUsages,
         },
-        view::RenderLayers,
-    }, input::gamepad::{GamepadRumbleRequest, GamepadEvent, GamepadRumbleIntensity},
+        view::{RenderLayers, screenshot::ScreenshotManager}
+    }, window::{WindowTheme, PrimaryWindow}
 };
 
 fn main(){
     App::new()
-        .add_plugins((DefaultPlugins, FrameTimeDiagnosticsPlugin))
+        .add_plugins((DefaultPlugins.set(WindowPlugin {
+                primary_window: Some(Window {
+                    title: "JBox".into(),
+                    resolution: (512., 512.).into(),
+                    window_theme: Some(WindowTheme::Dark),
+                    ..default()
+                }),
+                ..default()
+            }), FrameTimeDiagnosticsPlugin))
         .add_systems(Startup, setup)
         .add_systems(Update, cube_rotator_system)
         .add_systems(Update, text_update_system)
+        .add_systems(Update, screenshot_on_spacebar)
         .run();
 }
 
@@ -31,15 +43,28 @@ struct MainPassCube;
 #[derive(Component)]
 struct FpsText;
 
+fn screenshot_on_spacebar(
+    input: Res<Input<KeyCode>>,
+    main_window: Query<Entity, With<PrimaryWindow>>,
+    mut screenshot_manager: ResMut<ScreenshotManager>,
+) {
+    if input.just_pressed(KeyCode::Space) {
+        let date = chrono::Local::now().format("%Y-%m-%d-%H-%M-%S");
+        let path = format!("./ss/screenshot-{}.png", date);
+        screenshot_manager
+            .save_screenshot_to_disk(main_window.single(), path)
+            .unwrap();
+    }
+}
+
 fn setup(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut images: ResMut<Assets<Image>>,
-    mut windows: Query<&mut Window>,
     asset_server: ResMut<AssetServer>,
 ) {
-    windows.single_mut().resolution.set(512.0, 512.0);
+    fs::create_dir_all("./ss").unwrap();
 
     commands.spawn((
         TextBundle::from_sections([
