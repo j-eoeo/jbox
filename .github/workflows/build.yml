@@ -62,18 +62,18 @@ jobs:
         with:
           name: ${{ matrix.target }}
           path: |
-            target/${{ matrix.target }}/release/pcsc-rs
-            target/${{ matrix.target }}/release/pcsc-rs.exe
+            target/${{ matrix.target }}/release/jbox
+            target/${{ matrix.target }}/release/jbox.exe
       - name: Upload to release
         if: ${{ inputs.tag-name }}
         working-directory: target/${{ matrix.target }}/release/
         run: |
-          if [ -e pcsc-rs.exe ]; then
-            filename="pcsc-rs-${{ inputs.tag-name }}-${{ matrix.target }}.exe"
-            mv pcsc-rs.exe "$filename"
+          if [ -e jbox.exe ]; then
+            filename="jbox-${{ inputs.tag-name }}-${{ matrix.target }}.exe"
+            mv jbox.exe "$filename"
             gh release upload ${{ inputs.tag-name }} "$filename"#${{ matrix.target }} --clobber
           else
-            filename="pcsc-rs-${{ inputs.tag-name }}-${{ matrix.target }}"
-            mv pcsc-rs "$filename"
+            filename="jbox-${{ inputs.tag-name }}-${{ matrix.target }}"
+            mv jbox "$filename"
             gh release upload ${{ inputs.tag-name }} "$filename"#${{ matrix.target }} --clobber
           fi
