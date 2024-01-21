@@ -146,7 +146,6 @@ fn setup(
                 ..default()
             },
             camera: Camera {
-                // render before the "main pass" camera
                 order: -1,
                 target: RenderTarget::Image(image_handle.clone()),
                 ..default()
