@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - 'main'
+      - 'develop'
   pull_request:
   pull_request_review:
   workflow_call:
@@ -48,28 +49,38 @@ jobs:
       - uses: Swatinem/rust-cache@23bce251a8cd2ffc3c1075eaa2367cf899916d84 # v2.7.3
         with:
           key: ${{ matrix.target }}
-      - name: Install cross
-        if: ${{ !matrix.os && matrix.use-cross }}
-        uses: taiki-e/install-action@3ed9916b5427bc0679b294607ea47d1d8007b53f # v2.25.7
-        with:
-          tool: cross
-      - run: ${{ (!matrix.os && matrix.use-cross) && 'cross' || 'cargo' }} build --locked --release --target ${{ matrix.target }}
+      - run: cargo build --locked --release --target ${{ matrix.target }}
+      - name: zip for linux and apple
+        if: matrix.target == 'x86_64-unknown-linux-gnu' || matrix.target == 'x86_64-apple-darwin' || matrix.target == 'aarch64-apple-darwin'
+        run: |
+          mkdir -p target/${{ matrix.target }}/zip
+          cp target/${{ matrix.target }}/release/jbox target/${{ matrix.target }}/zip
+          cp -r assets target/${{ matrix.target }}/zip
+          cd target/${{ matrix.target }}/zip
+          chmod +x jbox
+      - name: zip for windows
+        if: matrix.target == 'x86_64-pc-windows-msvc' || matrix.target == 'x86_64-pc-windows-gnu'
+        run: |
+          mkdir -p target/${{ matrix.target }}/zip
+          cp target/${{ matrix.target }}/release/jbox.exe target/${{ matrix.target }}/zip
+          cp -r assets target/${{ matrix.target }}/zip
+          cd target/${{ matrix.target }}/zip
       - uses: actions/upload-artifact@694cdabd8bdb0f10b2cea11669e1bf5453eed0a6 # v4.2.0
         with:
           name: ${{ matrix.target }}
-          path: |
-            target/${{ matrix.target }}/release/jbox
-            target/${{ matrix.target }}/release/jbox.exe
-      - name: Upload to release
-        if: ${{ inputs.tag-name }}
-        working-directory: target/${{ matrix.target }}/release/
-        run: |
-          if [ -e jbox.exe ]; then
-            filename="jbox-${{ inputs.tag-name }}-${{ matrix.target }}.exe"
-            mv jbox.exe "$filename"
-            gh release upload ${{ inputs.tag-name }} "$filename"#${{ matrix.target }} --clobber
-          else
-            filename="jbox-${{ inputs.tag-name }}-${{ matrix.target }}"
-            mv jbox "$filename"
-            gh release upload ${{ inputs.tag-name }} "$filename"#${{ matrix.target }} --clobber
-          fi
+          path: | 
+            target/${{ matrix.target }}/zip/jbox*
+            target/${{ matrix.target }}/zip/assets
+      #- name: Upload to release
+      #  if: ${{ inputs.tag-name }}
+      #  working-directory: target/${{ matrix.target }}/release/
+      #  run: |
+      #    if [ -e jbox.exe ]; then
+      #      filename="jbox-${{ inputs.tag-name }}-${{ matrix.target }}.exe"
+      #      mv jbox.exe "$filename"
+      #      gh release upload ${{ inputs.tag-name }} "$filename"#${{ matrix.target }} --clobber
+      #    else
+      #      filename="jbox-${{ inputs.tag-name }}-${{ matrix.target }}"
+      #      mv jbox "$filename"
+      #      gh release upload ${{ inputs.tag-name }} "$filename"#${{ matrix.target }} --clobber
+      #    fi
