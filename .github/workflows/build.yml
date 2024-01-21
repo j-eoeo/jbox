@@ -52,11 +52,13 @@ jobs:
       - name: zip for linux and apple
         if: matrix.target == 'x86_64-unknown-linux-gnu' || matrix.target == 'x86_64-apple-darwin' || matrix.target == 'aarch64-apple-darwin'
         run: |
-          zip target/${{ matrix.target }}.zip target/${{ matrix.target }}/release/jbox -r assets
+          zip target/${{ matrix.target }}.zip target/${{ matrix.target }}/release/jbox
+          zip -r target/${{ matrix.target }}.zip assets
       - name: zip for windows
         if: matrix.target == 'x86_64-pc-windows-msvc' || matrix.target == 'x86_64-pc-windows-gnu'
         run: |
-          powershell compress-archive -Path target/${{ matrix.target }}/release/jbox.exe -Path assets/ -DestinationPath target/${{ matrix.target }}.zip
+          powershell compress-archive -Path target/${{ matrix.target }}/release/jbox.exe -DestinationPath target/${{ matrix.target }}.zip
+          powershell compress-archive -Path assets -DestinationPath target/${{ matrix.target }}.zip -Update
       - run: ${{ (!matrix.os && matrix.use-cross) && 'cross' || 'cargo' }} build --locked --release --target ${{ matrix.target }}
       - uses: actions/upload-artifact@694cdabd8bdb0f10b2cea11669e1bf5453eed0a6 # v4.2.0
         with:
