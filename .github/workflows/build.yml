@@ -44,11 +44,11 @@ jobs:
       - name: Install dependencies
         if: matrix.target == 'x86_64-unknown-linux-gnu' || matrix.target == 'aarch64-unknown-linux-gnu'
         run: |
-          sudo apt-get install -y libasound2-dev libasound2 libudev-dev --no-install-recommends
+          sudo apt-get install -y alsa-lib libudev-dev --no-install-recommends
       - name: Install musl tools
         if: matrix.target == 'x86_64-unknown-linux-musl' || matrix.target == 'aarch64-unknown-linux-musl'
         run: |
-          sudo apt-get install -y musl-tools libasound2 libasound2-dev libudev-dev --no-install-recommends
+          sudo apt-get install -y musl-tools alsa-lib libudev-dev --no-install-recommends
       - uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
       - uses: dtolnay/rust-toolchain@stable
         with:
