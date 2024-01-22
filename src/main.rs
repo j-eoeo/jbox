@@ -28,9 +28,11 @@ fn main(){
                 ..default()
             }), FrameTimeDiagnosticsPlugin))
         .add_systems(Startup, setup)
-        .add_systems(Update, cube_rotator_system)
-        .add_systems(Update, text_update_system)
-        .add_systems(Update, screenshot_on_spacebar)
+        .add_systems(Update, (
+            cube_rotator_system,
+            text_update_system,
+            screenshot_on_spacebar
+        ))
         .run();
 }
 
@@ -65,7 +67,7 @@ fn setup(
     asset_server: ResMut<AssetServer>,
 ) {
     fs::create_dir_all("./ss").unwrap();
-
+    
     commands.spawn((
         TextBundle::from_sections([
             TextSection::new(
