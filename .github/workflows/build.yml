@@ -57,7 +57,7 @@ jobs:
           cp target/${{ matrix.target }}/release/jbox target/${{ matrix.target }}/zip
           cp -r assets target/${{ matrix.target }}/zip
           cd target/${{ matrix.target }}/zip
-          tar -czf ${{ matrix.target }}.tar.gz . --warning=no-file-changed
+          tar -czf ${{ matrix.target }}.tar.gz .
       - name: zip for windows
         if: matrix.target == 'x86_64-pc-windows-msvc' || matrix.target == 'x86_64-pc-windows-gnu'
         run: |
